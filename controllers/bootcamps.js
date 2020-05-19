@@ -12,7 +12,7 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
      const reqQuery = {...req.query};
 
      // fileds to exclude
-     const removeFields = ['select','sort'];
+     const removeFields = ['select','sort','page','limit'];
 
      // lopp over removeflied and delete them from reqQwury
      removeFields.forEach(param => delete reqQuery[param]);
@@ -39,11 +39,37 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
     } else { 
       query = query.sort('-createdAt');
     }
+
+    // Pagination
+    const page = parseInt(req.query.page,10) || 1;
+    const limit = parseInt(req.query.limit,10)|| 25;
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const total = await BootCamp.countDocuments();
+
+
+    query = query.skip(startIndex).limit(limit);
     // Excuting query
     const bootCamps = await query;
-    
 
-    res.status(200).json({ success: true, count:bootCamps.length, data: bootCamps });
+    // pagination result
+    const pagination = {};
+
+    if(endIndex < total) {
+      pagination.next = {
+        page: page +1,
+        limit
+      }
+    }
+    
+    if(startIndex > 0) {
+      pagination.prev = {
+        page: page -1,
+        limit
+      }
+    }
+
+    res.status(200).json({ success: true, count:bootCamps.length,pagination:pagination ,data: bootCamps });
  
 });
 
