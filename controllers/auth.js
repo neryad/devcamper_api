@@ -141,10 +141,48 @@ exports.resetPassword = asyncHandler(async(req,res,next) => {
 
 });
 
+// @descUpdate user daterails
+// @route put/api/v1/auth/updatedeails
+// @access private
+
+exports.updateDetails = asyncHandler(async(req,res,next) => {
+
+  const filedsdToUpdate = {
+    name:req.body.name,
+    email:req.body.email
+  }
+
+  const user = await User.findByIdAndUpdate(req.user.id, filedsdToUpdate,{
+    new: true,
+    runValidators:true
+  });
+
+  res.status(200).json({
+    succcess: true,
+    data: user
+  });
+});
+
+// @desc Update password
+// @route Put/api/v1/auth/updatepassword
+// @access private
+
+exports.updatePassword = asyncHandler(async(req,res,next) =>{
+  const user = await User.findById(req.user.id).select('+password');
+
+  //check current password
+  if(!(await user.matchPassword(req.body.currentPassword))){
+    return next(new ErrorResponse('Password is incorrect',401));
+  }
+
+  user.password = req.body.newPassword;
+  await user.save();
+
+  senTokenResponse(user,200, res);
+});
 
 
 // Get Token from model, create cookie and send response
-
 const senTokenResponse = (user,statusCode,res) => {
   const token = user.getSinedJwToken();
 
