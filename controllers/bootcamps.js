@@ -27,6 +27,20 @@ exports.getBootcamp = asyncHandler(async (req, res, next) => {
 // @route Post/api/v1/bootcamps/
 // @access private
 exports.createBootcamp = asyncHandler(async (req, res, next) => {
+
+  //Add user to req.body
+  req.body.user = req.user.id;
+
+  // check for publis bootcamp
+  const publishedBootCamp = await BootCamp.findOne({user: req.user.id});
+
+  // if user is not afmin con only add one bootcam
+  if(publishedBootCamp && req.user.role !=='admin') {
+
+    return next(new ErrorResponse(`User with ID ${req.user.id} has already published a bootcamp`,400));
+}
+
+
   const bootcamp = await BootCamp.create(req.body);
 
   res.status(201).json({
