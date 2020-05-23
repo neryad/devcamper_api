@@ -30,3 +30,14 @@ try {
     return next(new ErrorResponse('No authorize to access this route',401));
 }
 });
+
+// Grante access to spesific roles
+
+exports.authorize = (...roles) => {
+  return (req,res,next)=>{
+    if(!roles.includes(req.user.role)) {
+      return next(new ErrorResponse(`User role ${req.user.role} is not authorize to acces this route`, 403));
+    }
+    next();
+  }
+}
