@@ -26,6 +26,7 @@ app.use(express.json());
 
 // CookiePArse
 app.use(cookieParser());
+
 // Dev loggin moddlware
 if(process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
