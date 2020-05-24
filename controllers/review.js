@@ -60,3 +60,50 @@ exports.addreview = asyncHandler(async(req,res,next) => {
     });
 });
 
+// @desc update  reviews 
+// @route Put/api/v1/reviews/:id
+// @access private
+exports.updateReview = asyncHandler(async(req,res,next) => {  
+    let review = await Review.findById(req.params.id);
+  
+    if(!review){
+     return  next(new ErrorResponse(`No review find with id:${req.params.id}`,404))
+    }
+    
+    // make sure belong to user is admin
+   if(!review.user.toString() !== req.user.id && req.user.role !== 'admin'){
+    return  next(new ErrorResponse(`No authorize to update review `,401))
+   }
+     review = await Review.findByIdAndUpdate(req.params.id,req.body,{
+        new:true,
+        runValidators:true
+    });
+      res.status(200).json({
+          success:true,
+          data:review
+      });
+  });
+
+  // @desc Delete  reviews 
+// @route Put/api/v1/reviews/:id
+// @access private
+exports.deleteeReview = asyncHandler(async(req,res,next) => {  
+    const review = await Review.findById(req.params.id);
+  
+    if(!review){
+     return  next(new ErrorResponse(`No review find with id:${req.params.id}`,404))
+    }
+    
+    // make sure belong to user is admin
+   if(!review.user.toString() !== req.user.id && req.user.role !== 'admin'){
+    return  next(new ErrorResponse(`No authorize to update review `,401))
+   }
+    await Review.remove();
+      res.status(200).json({
+          success:true,
+          data:{}
+      });
+  });
+  
+  
+
